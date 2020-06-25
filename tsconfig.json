@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "es2018",
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "sourceMap": true,
+    "rootDirs": [".", "src"],
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "outDir": "./build",
+    "lib": ["es5", "es6", "es2018"]
+  },
+  "include": ["src/**/*", "env.config.js"],
+  "exclude": ["node_modules"]
+}
