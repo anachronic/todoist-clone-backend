@@ -1,8 +1,13 @@
 import { ApolloServer } from 'apollo-server-express'
 import { GraphQLRequestContext } from 'apollo-server-types'
-import { Express } from 'express'
+import { Express, Request } from 'express'
 import { buildSchema } from 'type-graphql'
 import Logger from 'bunyan'
+
+export interface ServerContext {
+  logger: Logger
+  request: Request
+}
 
 export async function setupApollo(app: Express, logger: Logger): Promise<void> {
   const queryLoggingPlugin = {
@@ -19,6 +24,7 @@ export async function setupApollo(app: Express, logger: Logger): Promise<void> {
     const apolloServer = new ApolloServer({
       schema,
       plugins: [queryLoggingPlugin],
+      context: ({ req }): ServerContext => ({ request: req, logger }),
     })
     apolloServer.applyMiddleware({ app })
   } catch (err) {
