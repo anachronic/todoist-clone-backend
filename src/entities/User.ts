@@ -1,4 +1,4 @@
-import { hash } from 'bcrypt'
+import { hash, compare } from 'bcrypt'
 import { Field, ID, ObjectType } from 'type-graphql'
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
@@ -24,9 +24,22 @@ export class User extends BaseEntity {
   hashedPassword: string
 
   @Field(() => String)
-  @Column({ nullable: false })
+  @Column({
+    nullable: false,
+    unique: true,
+    transformer: {
+      to: (value: string) => value.toLowerCase(),
+      from: (value: string) => value,
+    },
+  })
   email: string
 
+  // instance methods
+  async comparePassword(password: string): Promise<boolean> {
+    return await compare(password, this.hashedPassword)
+  }
+
+  // Non active record static methods
   static async generateHashedPassword(password: string): Promise<string> {
     return await hash(password, this.SALT_ROUNDS)
   }

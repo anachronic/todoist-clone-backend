@@ -6,7 +6,7 @@ import { CreateUserInput } from './types/CreateUserInput'
 export class UserResolver {
   @Query(() => User, { nullable: true })
   async me(): Promise<User | null> {
-    return (await User.findOne({ id: 1 })) || null
+    return (await User.findOne({ id: 2 })) || null
   }
 
   @Mutation(() => User)
@@ -18,6 +18,7 @@ export class UserResolver {
     newUser.hashedPassword = await User.generateHashedPassword(user.password)
 
     await newUser.save()
+    newUser.email = newUser.email.toLowerCase()
     return newUser
   }
 }
