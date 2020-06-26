@@ -1,6 +1,7 @@
 import { hash, compare } from 'bcrypt'
 import { Field, ID, ObjectType } from 'type-graphql'
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { sign } from 'jsonwebtoken'
 
 @Entity()
 @ObjectType()
@@ -37,6 +38,27 @@ export class User extends BaseEntity {
   // instance methods
   async comparePassword(password: string): Promise<boolean> {
     return await compare(password, this.hashedPassword)
+  }
+
+  createAccessToken(): string {
+    return sign(
+      {
+        userId: this.id,
+        email: this.email,
+        name: this.name,
+        lastName: this.lastName,
+      },
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      process.env.ACCESS_TOKEN_SECRET!,
+      {
+        expiresIn: '15m',
+      }
+    )
+  }
+
+  createRefreshToken(): string {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return sign({ userId: this.id }, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '7d' })
   }
 
   // Non active record static methods

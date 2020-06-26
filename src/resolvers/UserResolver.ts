@@ -1,12 +1,19 @@
-import { Resolver, Query, Mutation, Arg } from 'type-graphql'
+import { Resolver, Query, Mutation, Arg, UseMiddleware, Ctx } from 'type-graphql'
 import { User } from '../entities/User'
 import { CreateUserInput } from './types/CreateUserInput'
+import { needsAuth } from '../middleware/auth'
+import { ServerContext } from '../config/apollo'
 
 @Resolver()
 export class UserResolver {
   @Query(() => User, { nullable: true })
-  async me(): Promise<User | null> {
-    return (await User.findOne({ id: 2 })) || null
+  @UseMiddleware(needsAuth)
+  async me(@Ctx() { user }: ServerContext): Promise<User | null> {
+    if (!user) {
+      return null
+    }
+
+    return user
   }
 
   @Mutation(() => User)
