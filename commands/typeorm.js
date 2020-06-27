@@ -12,6 +12,8 @@ if (process.argv.length > 2) {
 }
 
 try {
-  execSync(`node --require ts-node/register ./node_modules/typeorm/cli.js ${args}`)
+  execSync(`node --require ts-node/register ./node_modules/typeorm/cli.js ${args}`, {
+    stdio: 'inherit',
+  })
   // eslint-disable-next-line no-empty
 } catch {}
