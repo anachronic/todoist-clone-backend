@@ -3,6 +3,8 @@ import express from 'express'
 import 'reflect-metadata'
 import { setupApollo } from './config/apollo'
 import { setupDatabase } from './config/database'
+import { sessionRouter } from './routers/SessionRouter'
+import cookieParser from 'cookie-parser'
 
 async function main() {
   dotenv.config({ path: '.prod.env' })
@@ -17,11 +19,13 @@ async function main() {
   await setupDatabase(logger)
   await setupApollo(app, logger)
 
+  app.use(cookieParser())
   app.get('/', async (_req, res) => {
     res.send({
       status: 'ok',
     })
   })
+  app.use('/sessions', sessionRouter)
 
   app.listen(port, () => logger.info(`Listening on ${port}`))
 }
