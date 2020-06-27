@@ -13,10 +13,12 @@
   "author": "Nicolás Salas V.",
   "license": "MIT",
   "dependencies": {
+    "@types/cookie-parser": "^1.4.2",
     "apollo-server-express": "^2.15.0",
     "bcrypt": "^5.0.0",
     "bunyan": "^1.8.13",
     "class-validator": "^0.12.2",
+    "cookie-parser": "^1.4.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "graphql": "^15.1.0",
