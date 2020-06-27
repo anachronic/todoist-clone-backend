@@ -1,7 +1,8 @@
+import { verify } from 'jsonwebtoken'
 import { MiddlewareFn } from 'type-graphql'
 import { ServerContext } from '../config/apollo'
-import { verify } from 'jsonwebtoken'
 import { User } from '../entities/User'
+import { NotAuthenticated } from '../errors/NotAuthenticated'
 
 export const needsAuth: MiddlewareFn<ServerContext> = async ({ context }, next) => {
   const { request, logger } = context
@@ -23,7 +24,7 @@ export const needsAuth: MiddlewareFn<ServerContext> = async ({ context }, next) 
     logger.info(
       `Failed to either parse authorization token or token is not valid: ${authorization}`
     )
-    throw new Error()
+    throw new NotAuthenticated()
   }
 
   return next()

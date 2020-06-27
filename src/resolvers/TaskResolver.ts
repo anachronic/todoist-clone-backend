@@ -2,6 +2,7 @@ import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql
 import { ServerContext } from '../config/apollo'
 import { Task } from '../entities/Task'
 import { needsAuth } from '../middleware/auth'
+import { DatabaseError } from '../errors/DatabaseError'
 
 @Resolver()
 export class TaskResolver {
@@ -40,6 +41,33 @@ export class TaskResolver {
     })
     await task.save()
     console.log(task.id)
+
+    return task
+  }
+
+  @Mutation(() => Task)
+  @UseMiddleware(needsAuth)
+  async completeTask(
+    @Arg('id') taskId: number,
+    @Ctx() { user }: ServerContext
+  ): Promise<Task | null> {
+    const userId = user?.id
+
+    if (!userId) {
+      throw new DatabaseError('Task not found for current user')
+    }
+
+    const task = await Task.createQueryBuilder('task')
+      .where('task.id = :taskId', { taskId })
+      .andWhere('task.user = :userId', { userId })
+      .getOne()
+
+    if (!task) {
+      throw new DatabaseError('Task not found for current user')
+    }
+
+    task.done = true
+    await task.save()
 
     return task
   }
