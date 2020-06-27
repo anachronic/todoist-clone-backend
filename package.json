@@ -4,7 +4,7 @@
   "description": "An express boilerplate for Type-GraphQL, TypeORM and Typescript",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon",
+    "start": "ts-node-dev --no-notify --ignore-watch \".*\\.spec\\.ts\" --respawn --inspect -- src/server.ts",
     "typeorm": "node ./commands/typeorm",
     "build": "rimraf ./build && tsc",
     "start:production": "cd build && NODE_ENV=production node ./server.js"
@@ -23,6 +23,7 @@
     "express": "^4.17.1",
     "graphql": "^15.1.0",
     "jsonwebtoken": "^8.5.1",
+    "moment": "^2.27.0",
     "morgan": "^1.10.0",
     "pg": "^8.2.1",
     "reflect-metadata": "^0.1.13",
@@ -46,9 +47,9 @@
     "eslint": "^7.3.1",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
-    "nodemon": "^2.0.4",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
-    "ts-node": "^8.10.2"
+    "ts-node": "^8.10.2",
+    "ts-node-dev": "^1.0.0-pre.49"
   }
 }
