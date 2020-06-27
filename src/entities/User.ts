@@ -1,7 +1,8 @@
 import { hash, compare } from 'bcrypt'
 import { Field, ID, ObjectType } from 'type-graphql'
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm'
 import { sign } from 'jsonwebtoken'
+import { Task } from './Task'
 
 @Entity()
 @ObjectType()
@@ -17,7 +18,7 @@ export class User extends BaseEntity {
   @Column()
   name: string
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   lastName: string
 
@@ -34,6 +35,10 @@ export class User extends BaseEntity {
     },
   })
   email: string
+
+  @OneToMany(() => Task, (task) => task.user, { lazy: true })
+  @Field(() => [Task])
+  tasks: Task[] | Promise<Task[]>
 
   // instance methods
   async comparePassword(password: string): Promise<boolean> {
