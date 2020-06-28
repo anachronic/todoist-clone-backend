@@ -1,5 +1,6 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm'
 import { Field, ID, ObjectType } from 'type-graphql'
+import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { dateTransformer } from './transformers'
 import { User } from './User'
 
 @Entity()
@@ -16,6 +17,14 @@ export class Task extends BaseEntity {
   @Column({ default: false })
   @Field(() => Boolean)
   done: boolean
+
+  @Column({
+    type: 'date',
+    nullable: true,
+    transformer: dateTransformer,
+  })
+  @Field(() => Date, { nullable: true })
+  schedule?: Date
 
   @ManyToOne(() => User, (user) => user.tasks, { lazy: true })
   @Field(() => User)
