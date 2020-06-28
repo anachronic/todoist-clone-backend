@@ -1,7 +1,7 @@
 import { Field, ID, ObjectType } from 'type-graphql'
 import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Project } from './Project'
 import { dateTransformer } from './transformers'
-import { User } from './User'
 
 @Entity()
 @ObjectType()
@@ -26,7 +26,6 @@ export class Task extends BaseEntity {
   @Field(() => Date, { nullable: true })
   schedule?: Date
 
-  @ManyToOne(() => User, (user) => user.tasks, { lazy: true })
-  @Field(() => User)
-  user: Promise<User> | User
+  @ManyToOne(() => Project, (project) => project.tasks, { lazy: true })
+  project: Promise<Project> | Project
 }

@@ -1,8 +1,8 @@
-import { hash, compare } from 'bcrypt'
-import { Field, ID, ObjectType } from 'type-graphql'
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm'
+import { compare, hash } from 'bcrypt'
 import { sign } from 'jsonwebtoken'
-import { Task } from './Task'
+import { Field, ID, ObjectType } from 'type-graphql'
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Project } from './Project'
 
 @Entity()
 @ObjectType()
@@ -36,9 +36,9 @@ export class User extends BaseEntity {
   })
   email: string
 
-  @OneToMany(() => Task, (task) => task.user, { lazy: true })
-  @Field(() => [Task])
-  tasks: Task[] | Promise<Task[]>
+  @OneToMany(() => Project, (project) => project.user, { lazy: true })
+  @Field(() => [Project])
+  projects: Promise<Project[]> | Project[]
 
   // instance methods
   async comparePassword(password: string): Promise<boolean> {

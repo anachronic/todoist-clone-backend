@@ -1,8 +1,12 @@
 import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { ServerContext } from '../config/apollo'
+import { Project } from '../entities/Project'
 import { Task } from '../entities/Task'
+import { User } from '../entities/User'
 import { DatabaseError } from '../errors/DatabaseError'
+import { NotAuthenticated } from '../errors/NotAuthenticated'
 import { needsAuth } from '../middleware/auth'
+import { TaskCreateInput } from './types/TaskCreateInput'
 import { TaskInput } from './types/TaskInput'
 
 @Resolver()
@@ -13,11 +17,12 @@ export class TaskResolver {
     const userId = user?.id
 
     if (!userId) {
-      throw new Error('No user found in context. Try again')
+      throw new NotAuthenticated('This query needs authentication')
     }
 
     const tasks = await Task.createQueryBuilder('task')
-      .where('task.user = :user', {
+      .leftJoinAndSelect('task.project', 'project')
+      .where('project.user = :user', {
         user: userId,
       })
       .getMany()
@@ -27,21 +32,25 @@ export class TaskResolver {
 
   @Mutation(() => Task)
   @UseMiddleware(needsAuth)
-  async createTask(@Arg('text') text: string, @Ctx() { user }: ServerContext): Promise<Task> {
-    const userId = user?.id
+  async createTask(
+    @Arg('task') { text, projectId }: TaskCreateInput,
+    @Ctx() { user: ctxUser }: ServerContext
+  ): Promise<Task> {
+    const userId = ctxUser?.id
 
     if (!userId) {
-      throw new Error("Couldn't create task")
+      throw new NotAuthenticated('This mutation requires authentication')
     }
 
+    const user = await User.findOneOrFail({ id: userId })
+    const associatedProject = await Project.findProjectOrInbox(user, projectId)
     const task = Task.create({
       text,
-      user: {
-        id: userId,
+      project: {
+        id: associatedProject.id,
       },
     })
     await task.save()
-    console.log(task.id)
 
     return task
   }
@@ -59,8 +68,9 @@ export class TaskResolver {
     }
 
     const task = await Task.createQueryBuilder('task')
+      .innerJoinAndSelect('task.project', 'project')
       .where('task.id = :taskId', { taskId })
-      .andWhere('task.user = :userId', { userId })
+      .andWhere('project.user = :userId', { userId })
       .getOne()
 
     if (!task) {
