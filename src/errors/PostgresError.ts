@@ -11,7 +11,7 @@ export class PostgresError extends Error {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+// eslint-disable-next-line
 export function handleSavingError(err: any, message: string): never {
   if (err.code === '23505') {
     throw new EntityAlreadyExistsError(`${message} alredy exists.`)

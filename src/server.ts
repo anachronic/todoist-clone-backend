@@ -1,10 +1,11 @@
+import cookieParser from 'cookie-parser'
 import dotenv from 'dotenv'
 import express from 'express'
 import 'reflect-metadata'
 import { setupApollo } from './config/apollo'
 import { setupDatabase } from './config/database'
 import { sessionRouter } from './routers/SessionRouter'
-import cookieParser from 'cookie-parser'
+import cors from 'cors'
 
 async function main() {
   dotenv.config({ path: '.prod.env' })
@@ -15,6 +16,12 @@ async function main() {
   const app = express()
 
   const { setupLogging, logger } = await import('./config/logging')
+  app.use(
+    cors({
+      credentials: true,
+      origin: 'http://localhost:3000',
+    })
+  )
   await setupLogging(app)
   await setupDatabase(logger)
   await setupApollo(app, logger)

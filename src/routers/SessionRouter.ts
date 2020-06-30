@@ -1,4 +1,4 @@
-import express, { Router, Response } from 'express'
+import express, { Router, Response, response } from 'express'
 import { verify } from 'jsonwebtoken'
 import { logger } from '../config/logging'
 import { User } from '../entities/User'
@@ -37,6 +37,12 @@ sessionRouter.post('/refresh-token', async (req, res) => {
   }
 
   return makeResponse(res, user.createAccessToken())
+})
+
+sessionRouter.delete('/refresh-token', async (req, res) => {
+  res.cookie('refreshtoken', null)
+
+  res.send(null)
 })
 
 export { sessionRouter }

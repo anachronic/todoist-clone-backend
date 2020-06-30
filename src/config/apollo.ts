@@ -33,7 +33,10 @@ export async function setupApollo(app: Express, logger: Logger): Promise<void> {
         response: res,
       }),
     })
-    apolloServer.applyMiddleware({ app })
+    apolloServer.applyMiddleware({
+      app,
+      cors: false,
+    })
   } catch (err) {
     logger.error('Failed to init apollo server')
     throw err
