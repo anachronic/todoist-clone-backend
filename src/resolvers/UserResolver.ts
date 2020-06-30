@@ -3,6 +3,8 @@ import { User } from '../entities/User'
 import { CreateUserInput } from './types/CreateUserInput'
 import { needsAuth } from '../middleware/auth'
 import { ServerContext } from '../config/apollo'
+import { getCustomRepository } from 'typeorm'
+import { UserRepository } from '../repositories/UserRepository'
 
 @Resolver()
 export class UserResolver {
@@ -18,14 +20,8 @@ export class UserResolver {
 
   @Mutation(() => User)
   async registerUser(@Arg('user') user: CreateUserInput): Promise<User> {
-    const newUser = new User()
-    newUser.email = user.email
-    newUser.name = user.name
-    newUser.lastName = user.lastName
-    newUser.hashedPassword = await User.generateHashedPassword(user.password)
+    const repository = getCustomRepository(UserRepository)
 
-    await newUser.save()
-    newUser.email = newUser.email.toLowerCase()
-    return newUser
+    return await repository.createFromGraphqlInput(user)
   }
 }
