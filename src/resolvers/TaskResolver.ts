@@ -13,21 +13,27 @@ import { TaskInput } from './types/TaskInput'
 export class TaskResolver {
   @Query(() => [Task])
   @UseMiddleware(needsAuth)
-  async tasks(@Ctx() { user }: ServerContext): Promise<Task[]> {
+  async tasks(
+    @Ctx() { user }: ServerContext,
+    @Arg('done', { nullable: true }) done?: boolean
+  ): Promise<Task[]> {
     const userId = user?.id
 
     if (!userId) {
       throw new NotAuthenticated('This query needs authentication')
     }
 
-    const tasks = await Task.createQueryBuilder('task')
+    const qb = Task.createQueryBuilder('task')
       .leftJoinAndSelect('task.project', 'project')
       .where('project.user = :user', {
         user: userId,
       })
-      .getMany()
 
-    return tasks
+    if (typeof done === 'boolean') {
+      qb.andWhere('task.done = :done', { done })
+    }
+
+    return await qb.getMany()
   }
 
   @Mutation(() => Task)
