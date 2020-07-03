@@ -15,7 +15,8 @@ export class TaskResolver {
   @UseMiddleware(needsAuth)
   async tasks(
     @Ctx() { user }: ServerContext,
-    @Arg('done', { nullable: true }) done?: boolean
+    @Arg('done', { nullable: true }) done?: boolean,
+    @Arg('projectId', { nullable: true }) projectId?: number
   ): Promise<Task[]> {
     const userId = user?.id
 
@@ -31,6 +32,10 @@ export class TaskResolver {
 
     if (typeof done === 'boolean') {
       qb.andWhere('task.done = :done', { done })
+    }
+
+    if (typeof projectId === 'number') {
+      qb.andWhere('project.id = :projectId', { projectId })
     }
 
     return await qb.getMany()
