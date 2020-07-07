@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from 'type-graphql'
 import { BaseEntity, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { ProjectColor } from './ProjectColor'
 import { Task } from './Task'
 import { User } from './User'
 
@@ -21,6 +22,9 @@ export class Project extends BaseEntity {
   @OneToMany(() => Task, (task: Task) => task.project, { lazy: true })
   @Field(() => [Task])
   tasks: Promise<Task[]> | Task[]
+
+  @ManyToOne(() => ProjectColor, { nullable: true })
+  color: Promise<ProjectColor> | ProjectColor
 
   // Active Record
   static async findProjectOrInbox(user: User, id?: number): Promise<Project> {
