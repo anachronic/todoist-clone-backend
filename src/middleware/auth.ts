@@ -9,7 +9,7 @@ export const needsAuth: MiddlewareFn<ServerContext> = async ({ context }, next) 
 
   const authorization = request.headers.authorization
   if (!authorization) {
-    throw new Error('Not authenticated')
+    throw new NotAuthenticated('Not authenticated')
   }
 
   try {
