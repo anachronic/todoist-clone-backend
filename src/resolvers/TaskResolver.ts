@@ -16,7 +16,8 @@ export class TaskResolver {
   async tasks(
     @Ctx() { user }: ServerContext,
     @Arg('done', { nullable: true }) done?: boolean,
-    @Arg('projectId', { nullable: true }) projectId?: number
+    @Arg('projectId', { nullable: true }) projectId?: number,
+    @Arg('forToday', { nullable: true }) forToday?: boolean
   ): Promise<Task[]> {
     const userId = user?.id
 
@@ -36,6 +37,10 @@ export class TaskResolver {
 
     if (typeof projectId === 'number') {
       qb.andWhere('project.id = :projectId', { projectId })
+    }
+
+    if (typeof forToday === 'boolean') {
+      qb.andWhere('task.schedule = :date', { date: new Date() })
     }
 
     return await qb.getMany()
