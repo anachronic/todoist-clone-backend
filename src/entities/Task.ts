@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from 'type-graphql'
+import { Field, ObjectType } from 'type-graphql'
 import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import { Project } from './Project'
 import { dateTransformer } from './transformers'
@@ -7,7 +7,7 @@ import { dateTransformer } from './transformers'
 @ObjectType()
 export class Task extends BaseEntity {
   @PrimaryGeneratedColumn()
-  @Field(() => ID)
+  @Field()
   id: number
 
   @Column()

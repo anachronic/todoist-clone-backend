@@ -1,5 +1,6 @@
 import { Field, InputType } from 'type-graphql'
 import { Task } from '../../entities/Task'
+import { ISODate } from './DateType'
 
 @InputType()
 export class TaskInput implements Partial<Task> {
@@ -12,6 +13,6 @@ export class TaskInput implements Partial<Task> {
   @Field(() => Boolean, { nullable: true })
   done?: boolean
 
-  @Field({ nullable: true })
+  @Field(() => ISODate, { nullable: true })
   schedule?: Date
 }
