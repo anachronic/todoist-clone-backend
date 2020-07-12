@@ -6,6 +6,6 @@ export class TaskCreateInput implements Partial<Task> {
   @Field()
   text: string
 
-  @Field(() => Number, { nullable: true })
-  projectId?: number
+  @Field(() => String, { nullable: true })
+  projectId?: string
 }

@@ -3,9 +3,9 @@ import { Task } from '../../entities/Task'
 import { ISODate } from './DateType'
 
 @InputType()
-export class TaskInput implements Partial<Task> {
-  @Field(() => Number)
-  id: number
+export class TaskInput implements Omit<Partial<Task>, 'id'> {
+  @Field(() => String)
+  id: string
 
   @Field({ nullable: true })
   text?: string
