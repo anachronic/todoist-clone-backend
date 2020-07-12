@@ -26,26 +26,4 @@ export class Project extends BaseEntity {
   @ManyToOne(() => ProjectColor, { nullable: true, lazy: true })
   @Field(() => ProjectColor, { nullable: true })
   color: Promise<ProjectColor> | ProjectColor
-
-  // Active Record
-  static async findProjectOrInbox(user: User, id?: number): Promise<Project> {
-    let project
-
-    const qb = this.createQueryBuilder('project')
-
-    if (id) {
-      qb.where('project.id = :id', { id })
-    } else {
-      qb.where('project.name = :name', { name: 'Inbox' })
-    }
-
-    project = await qb.andWhere('project.user = :userId', { userId: user.id }).getOne()
-
-    if (!project) {
-      project = this.create({ name: 'Inbox', user: { id: user.id } })
-      await project.save()
-    }
-
-    return project
-  }
 }

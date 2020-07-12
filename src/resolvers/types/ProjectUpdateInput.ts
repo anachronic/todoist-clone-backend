@@ -10,5 +10,5 @@ export class ProjectUpdateInput implements Omit<Partial<Project>, 'id'> {
   name?: string
 
   @Field({ nullable: true })
-  colorId?: number
+  colorId?: string
 }

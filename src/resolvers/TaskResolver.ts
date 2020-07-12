@@ -1,13 +1,14 @@
 import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
+import { getCustomRepository } from 'typeorm'
 import { ServerContext } from '../config/apollo'
-import { Project } from '../entities/Project'
 import { Task } from '../entities/Task'
-import { User } from '../entities/User'
 import { DatabaseError } from '../errors/DatabaseError'
 import { NotAuthenticated } from '../errors/NotAuthenticated'
 import { needsAuth } from '../middleware/auth'
+import { TaskRepository } from '../repositories/TaskRepository'
 import { TaskCreateInput } from './types/TaskCreateInput'
 import { TaskInput } from './types/TaskInput'
+import { TasksFilterInput } from './types/TasksFilterInput'
 
 @Resolver()
 export class TaskResolver {
@@ -15,9 +16,7 @@ export class TaskResolver {
   @UseMiddleware(needsAuth)
   async tasks(
     @Ctx() { user }: ServerContext,
-    @Arg('done', { nullable: true }) done?: boolean,
-    @Arg('projectId', { nullable: true }) projectId?: string,
-    @Arg('forToday', { nullable: true }) forToday?: boolean
+    @Arg('filters', { nullable: true }) input?: TasksFilterInput
   ): Promise<Task[]> {
     const userId = user?.id
 
@@ -25,31 +24,13 @@ export class TaskResolver {
       throw new NotAuthenticated('This query needs authentication')
     }
 
-    const qb = Task.createQueryBuilder('task')
-      .leftJoinAndSelect('task.project', 'project')
-      .where('project.user = :user', {
-        user: userId,
-      })
-
-    if (typeof done === 'boolean') {
-      qb.andWhere('task.done = :done', { done })
-    }
-
-    if (projectId) {
-      qb.andWhere('project.id = :projectId', { projectId })
-    }
-
-    if (typeof forToday === 'boolean') {
-      qb.andWhere('task.schedule = :date', { date: new Date() })
-    }
-
-    return await qb.getMany()
+    return await getCustomRepository(TaskRepository).filterTasksForUser(`${userId}`, input)
   }
 
   @Mutation(() => Task)
   @UseMiddleware(needsAuth)
   async createTask(
-    @Arg('task') { text, projectId }: TaskCreateInput,
+    @Arg('task') input: TaskCreateInput,
     @Ctx() { user: ctxUser }: ServerContext
   ): Promise<Task> {
     const userId = ctxUser?.id
@@ -58,23 +39,13 @@ export class TaskResolver {
       throw new NotAuthenticated('This mutation requires authentication')
     }
 
-    const user = await User.findOneOrFail({ id: userId })
-    const associatedProject = await Project.findProjectOrInbox(user, projectId)
-    const task = Task.create({
-      text,
-      project: {
-        id: associatedProject.id,
-      },
-    })
-    await task.save()
-
-    return task
+    return await getCustomRepository(TaskRepository).createAndSaveForUser(`{userId}`, input)
   }
 
   @Mutation(() => Task)
   @UseMiddleware(needsAuth)
   async updateTask(
-    @Arg('task') { id: taskId, ...fields }: TaskInput,
+    @Arg('task') input: TaskInput,
     @Ctx() { user }: ServerContext
   ): Promise<Task | null> {
     const userId = user?.id
@@ -83,18 +54,6 @@ export class TaskResolver {
       throw new DatabaseError('Task not found for current user')
     }
 
-    const task = await Task.createQueryBuilder('task')
-      .innerJoinAndSelect('task.project', 'project')
-      .where('task.id = :taskId', { taskId })
-      .andWhere('project.user = :userId', { userId })
-      .getOne()
-
-    if (!task) {
-      throw new DatabaseError('Task not found for current user')
-    }
-
-    const modifiedTask = Task.merge(task, fields)
-    await modifiedTask.save()
-    return modifiedTask
+    return await getCustomRepository(TaskRepository).updateTask(input, `${userId}`)
   }
 }

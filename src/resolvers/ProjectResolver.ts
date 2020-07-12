@@ -2,23 +2,23 @@ import {
   Arg,
   Args,
   Ctx,
+  FieldResolver,
   Mutation,
   Query,
   Resolver,
-  UseMiddleware,
-  FieldResolver,
   Root,
+  UseMiddleware,
 } from 'type-graphql'
+import { getCustomRepository } from 'typeorm'
 import { ServerContext } from '../config/apollo'
 import { Project } from '../entities/Project'
-import { User } from '../entities/User'
+import { Task } from '../entities/Task'
 import { NotAuthenticated } from '../errors/NotAuthenticated'
 import { needsAuth } from '../middleware/auth'
+import { ProjectRepository } from '../repositories/ProjectRepository'
 import { ProjectCreateInput } from './types/ProjectCreateInput'
 import { ProjectInput } from './types/ProjectInput'
 import { ProjectUpdateInput } from './types/ProjectUpdateInput'
-import { ProjectColor } from '../entities/ProjectColor'
-import { Task } from '../entities/Task'
 
 @Resolver(Project)
 export class ProjectResolver {
@@ -48,13 +48,7 @@ export class ProjectResolver {
       throw new NotAuthenticated('This query needs authentication')
     }
 
-    const qb = Project.createQueryBuilder('project').where('project.user.id = :userId', { userId })
-
-    if (!includeInbox) {
-      qb.andWhere('lower(project.name) <> :name', { name: 'inbox' })
-    }
-
-    return await qb.getMany()
+    return await getCustomRepository(ProjectRepository).findManyForUser(`${userId}`, includeInbox)
   }
 
   @Query(() => Project)
@@ -66,31 +60,7 @@ export class ProjectResolver {
       throw new NotAuthenticated()
     }
 
-    const qb = Project.createQueryBuilder('project')
-      .where('lower(project.name) = :name', {
-        name: 'inbox',
-      })
-      .andWhere('project.user.id = :userId', { userId })
-
-    let inbox = await qb.getOne()
-
-    if (inbox) {
-      return inbox
-    }
-
-    const currentUser = await User.findOne({ id: userId })
-
-    if (!currentUser) {
-      throw new NotAuthenticated()
-    }
-
-    inbox = Project.create({
-      name: 'Inbox',
-    })
-
-    inbox.user = currentUser
-    await inbox.save()
-    return inbox
+    return await getCustomRepository(ProjectRepository).findInboxForUser(`${userId}`)
   }
 
   @Query(() => Project)
@@ -102,16 +72,7 @@ export class ProjectResolver {
       throw new NotAuthenticated()
     }
 
-    const qb = Project.createQueryBuilder('project')
-      .where('project.id = :id', { id: +id })
-      .andWhere('project.user.id = :userId', { userId })
-
-    const result = await qb.getOne()
-    if (!result) {
-      throw new Error('No project found')
-    }
-
-    return result
+    return await getCustomRepository(ProjectRepository).findOneForUserOrFail(id, `${userId}`)
   }
 
   @Mutation(() => Project)
@@ -126,19 +87,16 @@ export class ProjectResolver {
       throw new NotAuthenticated('This mutation needs authentication')
     }
 
-    const user = await User.findOneOrFail(userId)
-    const project = Project.create(projectInput)
-    project.user = user
-
-    await project.save()
-
-    return project
+    return await getCustomRepository(ProjectRepository).createAndSaveForUser(
+      `${userId}`,
+      projectInput
+    )
   }
 
   @Mutation(() => Project)
   @UseMiddleware(needsAuth)
   async updateProject(
-    @Arg('project') { id, name, colorId }: ProjectUpdateInput,
+    @Arg('project') input: ProjectUpdateInput,
     @Ctx() { user: ctxUser }: ServerContext
   ): Promise<Project> {
     const userId = ctxUser?.id
@@ -147,29 +105,6 @@ export class ProjectResolver {
       throw new NotAuthenticated('This mutation needs authentication')
     }
 
-    const qb = Project.createQueryBuilder('project')
-      .where('project.id = :id', { id })
-      .andWhere('project.user.id = :userId', { userId })
-
-    const project = await qb.getOne()
-
-    if (!project) {
-      throw new Error('No project found')
-    }
-
-    if (name) {
-      project.name = name
-    }
-
-    if (typeof colorId !== 'undefined') {
-      const color = await ProjectColor.findOne({ id: colorId })
-      if (!color) {
-        throw new Error('Color not found')
-      }
-      project.color = color
-    }
-    await project.save()
-
-    return project
+    return await getCustomRepository(ProjectRepository).updateProject(input, `${userId}`)
   }
 }

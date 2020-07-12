@@ -16,8 +16,7 @@ export class ProjectColorResolver {
   @Query(() => [ProjectColor])
   @UseMiddleware(needsAuth)
   async projectColors(): Promise<ProjectColor[]> {
-    const qb = getRepository(ProjectColor).createQueryBuilder('color')
-    return await qb.getMany()
+    return await getRepository(ProjectColor).find()
   }
 
   @FieldResolver()
