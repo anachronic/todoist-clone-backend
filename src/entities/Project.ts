@@ -23,6 +23,9 @@ export class Project extends BaseEntity {
   @Field(() => [Task])
   tasks: Promise<Task[]> | Task[]
 
+  @Column({ nullable: true })
+  colorId?: number
+
   @ManyToOne(() => ProjectColor, { nullable: true, lazy: true })
   @Field(() => ProjectColor, { nullable: true })
   color: Promise<ProjectColor> | ProjectColor

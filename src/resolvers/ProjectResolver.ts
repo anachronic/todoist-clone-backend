@@ -19,6 +19,7 @@ import { ProjectRepository } from '../repositories/ProjectRepository'
 import { ProjectCreateInput } from './types/ProjectCreateInput'
 import { ProjectInput } from './types/ProjectInput'
 import { ProjectUpdateInput } from './types/ProjectUpdateInput'
+import { ProjectColor } from '../entities/ProjectColor'
 
 @Resolver(Project)
 export class ProjectResolver {
@@ -34,6 +35,17 @@ export class ProjectResolver {
     }
 
     return tasks
+  }
+
+  @FieldResolver()
+  async color(
+    @Root() project: Project,
+    @Ctx() { loaders }: ServerContext
+  ): Promise<ProjectColor | null> {
+    if (project.colorId) {
+      return loaders.projectColorLoader.load(`${project.colorId}`)
+    }
+    return null
   }
 
   @Query(() => [Project])

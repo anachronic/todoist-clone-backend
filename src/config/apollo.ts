@@ -1,15 +1,18 @@
 import { ApolloServer } from 'apollo-server-express'
 import { GraphQLRequestContext } from 'apollo-server-types'
+import Logger from 'bunyan'
 import { Express, Request, Response } from 'express'
 import { buildSchema } from 'type-graphql'
-import Logger from 'bunyan'
 import { User } from '../entities/User'
+import { Loaders } from '../loaders'
+import { createColorBatcher } from '../loaders/projectColorLoader'
 
 export interface ServerContext {
   logger: Logger
   request: Request
   response: Response
   user?: User
+  loaders: Loaders
 }
 
 export async function setupApollo(app: Express, logger: Logger): Promise<void> {
@@ -31,6 +34,9 @@ export async function setupApollo(app: Express, logger: Logger): Promise<void> {
         request: req,
         logger,
         response: res,
+        loaders: {
+          projectColorLoader: createColorBatcher(),
+        },
       }),
     })
     apolloServer.applyMiddleware({
