@@ -39,7 +39,7 @@ export class TaskResolver {
       throw new NotAuthenticated('This mutation requires authentication')
     }
 
-    return await getCustomRepository(TaskRepository).createAndSaveForUser(`{userId}`, input)
+    return await getCustomRepository(TaskRepository).createAndSaveForUser(`${userId}`, input)
   }
 
   @Mutation(() => Task)
