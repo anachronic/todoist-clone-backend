@@ -2,7 +2,7 @@ import { Field, InputType } from 'type-graphql'
 import { Project } from '../../entities/Project'
 
 @InputType()
-export class ProjectUpdateInput implements Omit<Partial<Project>, 'id'> {
+export class ProjectUpdateInput implements Omit<Partial<Project>, 'id' | 'colorId'> {
   @Field(() => String)
   id: string
 
