@@ -11,3 +11,5 @@ yarn-error.log
 !src/migrations/.gitkeep
 !src/subscribers/.gitkeep
 !src/resolvers/.gitkeep
+
+coverage
