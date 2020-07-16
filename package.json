@@ -7,7 +7,8 @@
     "start": "ts-node-dev --no-notify --ignore-watch \".*\\.spec\\.ts\" --respawn --inspect -- src/server.ts",
     "typeorm": "node ./commands/typeorm",
     "build": "rimraf ./build && tsc",
-    "start:production": "cd build && NODE_ENV=production node ./server.js"
+    "start:production": "cd build && NODE_ENV=production node ./server.js",
+    "test": "jest"
   },
   "keywords": [],
   "author": "Nicolás Salas V.",
@@ -39,6 +40,7 @@
     "@types/bunyan": "^1.8.6",
     "@types/express": "^4.17.6",
     "@types/graphql": "^14.5.0",
+    "@types/jest": "^26.0.4",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/morgan": "^1.9.1",
     "@types/node": "^14.0.13",
@@ -49,9 +51,12 @@
     "eslint": "^7.3.1",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
+    "jest": "^26.1.0",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
+    "ts-jest": "^26.1.2",
     "ts-node": "^8.10.2",
-    "ts-node-dev": "^1.0.0-pre.49"
+    "ts-node-dev": "^1.0.0-pre.49",
+    "typeorm-test-transactions": "^1.11.1"
   }
 }
