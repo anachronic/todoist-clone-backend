@@ -1,0 +1,32 @@
+version: 2.1
+orbs:
+  node: circleci/node@1.1
+jobs:
+  test:
+    docker:
+      - image: circleci/node:12.14.1
+        environment:
+          DATABASE_USER: root
+          DATABASE_PASSWORD:
+          DATABASE_NAME: todoist_clone_test
+      - image: circleci/postgres:12.3-ram
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: todoist_clone_test
+    steps:
+      - checkout
+      - node/with-cache:
+          steps:
+            - run: yarn install --frozen-lockfile
+      - run: yarn ci:test
+      - store_artifacts:
+          path: coverage
+  build:
+    docker:
+      - image: circleci/node:12.14.1
+    steps:
+      - checkout
+      - node/with-cache:
+          steps:
+            - run: yarn install --frozen-lockfile
+      - run: yarn build
