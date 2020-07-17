@@ -1,8 +1,9 @@
-import { ApolloServer } from 'apollo-server-express'
+import { ApolloError, ApolloServer } from 'apollo-server-express'
 import { GraphQLRequestContext } from 'apollo-server-types'
 import Logger from 'bunyan'
 import { Express, Request, Response } from 'express'
-import { buildSchema } from 'type-graphql'
+import { GraphQLError, GraphQLFormattedError, GraphQLSchema } from 'graphql'
+import { ArgumentValidationError, buildSchema } from 'type-graphql'
 import { User } from '../entities/User'
 import { Loaders } from '../loaders'
 import { createColorBatcher } from '../loaders/projectColorLoader'
@@ -15,6 +16,36 @@ export interface ServerContext {
   loaders: Loaders
 }
 
+export async function createSchema(): Promise<GraphQLSchema> {
+  return await buildSchema({
+    resolvers: [`${__dirname}/../resolvers/**/*.{ts,js}`],
+  })
+}
+
+export const formatGraphQLError = (error: GraphQLError): GraphQLFormattedError => {
+  if (error.originalError instanceof ApolloError) {
+    return error
+  }
+
+  if (error.originalError instanceof ArgumentValidationError) {
+    const formattedError = { ...error }
+
+    formattedError.extensions = {
+      ...error.extensions,
+      code: 'GRAPHQL_VALIDATION_FAILED',
+      messages: error.originalError.validationErrors.flatMap((validationError) =>
+        Object.values(validationError.constraints || {})
+      ),
+    }
+
+    return formattedError
+  }
+
+  error.message = 'Internal Server Error'
+
+  return error
+}
+
 export async function setupApollo(app: Express, logger: Logger): Promise<void> {
   const queryLoggingPlugin = {
     requestDidStart(requestContext: GraphQLRequestContext) {
@@ -23,13 +54,12 @@ export async function setupApollo(app: Express, logger: Logger): Promise<void> {
   }
 
   try {
-    const schema = await buildSchema({
-      resolvers: [`${__dirname}/../resolvers/**/*.{ts,js}`],
-    })
+    const schema = await createSchema()
 
     const apolloServer = new ApolloServer({
       schema,
       plugins: [queryLoggingPlugin],
+      formatError: formatGraphQLError,
       context: ({ req, res }): ServerContext => ({
         request: req,
         logger,

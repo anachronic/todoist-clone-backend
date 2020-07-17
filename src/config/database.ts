@@ -31,11 +31,5 @@ export async function setupTestingDatabase(): Promise<Connection> {
     migrationsRun: false,
   }
 
-  try {
-    return await createConnection(testOptions)
-  } catch (err) {
-    console.error('failed to setup testing database. Exiting...')
-    console.trace(err)
-    process.exit(-1)
-  }
+  return await createConnection(testOptions)
 }
