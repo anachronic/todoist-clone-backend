@@ -12,9 +12,11 @@ export class UserRepository extends AbstractRepository<User> {
     newUser.lastName = userInput.lastName
     newUser.hashedPassword = await User.generateHashedPassword(userInput.password)
 
-    await newUser.save().catch((err) => {
-      handleSavingError(err, newUser.email)
-    })
+    // try {
+    await newUser.save()
+    // } catch (err) {
+    //   handleSavingError(err, newUser.email)
+    // }
 
     return newUser
   }

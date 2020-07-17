@@ -1,10 +1,10 @@
-import { Resolver, Query, Mutation, Arg, UseMiddleware, Ctx } from 'type-graphql'
-import { User } from '../entities/User'
-import { CreateUserInput } from './types/CreateUserInput'
-import { needsAuth } from '../middleware/auth'
-import { ServerContext } from '../config/apollo'
+import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { getCustomRepository } from 'typeorm'
+import { ServerContext } from '../config/apollo'
+import { User } from '../entities/User'
+import { needsAuth } from '../middleware/auth'
 import { UserRepository } from '../repositories/UserRepository'
+import { CreateUserInput } from './types/CreateUserInput'
 
 @Resolver()
 export class UserResolver {
