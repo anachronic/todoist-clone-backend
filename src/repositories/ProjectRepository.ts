@@ -24,10 +24,10 @@ export class ProjectRepository extends Repository<Project> {
 
     if (typeof input.colorId !== 'undefined') {
       const color = await getRepository(ProjectColor).findOneOrFail(input.colorId)
-      project.color = color
+      project.colorId = color.id
     }
 
-    await project.save()
+    await this.save(project)
     return project
   }
 
@@ -102,7 +102,7 @@ export class ProjectRepository extends Repository<Project> {
     const project = Project.create(input)
     project.user = user
 
-    await project.save()
+    await this.save(project)
     return project
   }
 }
